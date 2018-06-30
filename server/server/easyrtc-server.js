@@ -1,5 +1,7 @@
 // Load required modules
 var http    = require("http");              // http server core module
+var https   = require("https");
+var fs = require('fs');
 var express = require("express");           // web framework external module
 var serveStatic = require('serve-static');  // serve static files
 var socketIo = require("socket.io");        // web socket external module
@@ -15,8 +17,21 @@ var port = process.env.PORT || 8080;
 var app = express();
 app.use(serveStatic('server/static', {'index': ['index.html']}));
 
+let webServer;
+if (process.env.SSL === "true") {
+  console.log("Starting server with SSL");
+  const options = {
+    key: fs.readFileSync("/ssl/netscreen.pem"),
+    cert: fs.readFileSync("/ssl/chain.pem")
+  };
+  webServer = https.createServer(options, app);
+} else {
+  console.log("Starting server without SSL");
+  webServer = http.createServer(app);
+}
+
 // Start Express http server
-var webServer = http.createServer(app);
+//var webServer = http.createServer(app);
 
 // Start Socket.io so it attaches itself to Express server
 var socketServer = socketIo.listen(webServer, {"log level":1});
