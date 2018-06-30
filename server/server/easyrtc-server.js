@@ -16,6 +16,13 @@ process.title = "node-easyrtc";
 // Setup and configure Express http server. Expect a subfolder called "static" to be the web root.
 var app = express();
 app.use(serveStatic('server/static', {'index': ['index.html']}));
+// set up a route to redirect http to https
+app.get('*', function(req, res) {  
+    res.redirect('https://' + req.headers.host + req.url);
+
+    // Or, if you don't want to automatically detect the domain name from the request header, you can hard code it:
+    // res.redirect('https://example.com' + req.url);
+})
 
 let port;
 let webServer;
@@ -96,3 +103,10 @@ var rtc = easyrtc.listen(app, socketServer, null, function(err, rtcRef) {
 webServer.listen(port, function () {
   console.log('listening on http://localhost:' + port);
 });
+
+if (process.env.SSL == 'true') {
+  http.createServer(function (req, res) {
+      res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+      res.end();
+  }).listen(80);
+}
