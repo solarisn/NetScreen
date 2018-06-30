@@ -3,6 +3,7 @@ var express = require('express');
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
+var path = require('path');
 
 process.title = "some-bullshit";
 
@@ -31,6 +32,6 @@ http.createServer(function (req, res) {
 }).listen(80);
 
 app.get('/', (req, res) => {
-  res.sendFile('index.html');
+  res.sendFile(path.join(__dirname+ '/index.html'));
 })
 
