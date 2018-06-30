@@ -11,21 +11,24 @@ var easyrtc = require("easyrtc");               // EasyRTC external module
 process.title = "node-easyrtc";
 
 // Get port or default to 8080
-var port = process.env.PORT || 8080;
+//var port = process.env.PORT || 443;
 
 // Setup and configure Express http server. Expect a subfolder called "static" to be the web root.
 var app = express();
 app.use(serveStatic('server/static', {'index': ['index.html']}));
 
+let port;
 let webServer;
 if (process.env.SSL === "true") {
+  port = process.env.PORT || 443;
   console.log("Starting server with SSL");
   const options = {
-    key: fs.readFileSync("/ssl/netscreen.pem"),
-    cert: fs.readFileSync("/ssl/chain.pem")
+    key: fs.readFileSync("/etc/letsencrypt/live/netscreen.3diq.io/privkey.pem"),
+    cert: fs.readFileSync("/etc/letsencrypt/live/netscreen.3diq.io/fullchain.pem")
   };
   webServer = https.createServer(options, app);
 } else {
+  port = process.env.PORT || 80;
   console.log("Starting server without SSL");
   webServer = http.createServer(app);
 }
