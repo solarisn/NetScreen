@@ -19,5 +19,8 @@
     "aframe-scene",
     "webvr",
     "vr"
-  ]
+  ],
+  "dependencies": {
+    "express": "^4.16.3"
+  }
 }
