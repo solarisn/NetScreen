@@ -8,16 +8,6 @@ process.title = "some-bullshit";
 
 var app = express();
 
-
-
-app.get('/', (req, res) => {
-  res.send('HEY!');
-  res.send('index.html');
-})
-
-app.listen(443, () => console.log('Server running on port 443'))
-
-
 let port;
 let webServer;
 
@@ -35,9 +25,13 @@ webServer.listen(port, function () {
   console.log('listening on http://localhost:' + port);
 });
 
-if (process.env.SSL == 'true') {
-  http.createServer(function (req, res) {
-      res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
-      res.end();
-  }).listen(80);
-}
+http.createServer(function (req, res) {
+  res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+  res.end();
+}).listen(80);
+
+app.get('/', (req, res) => {
+  res.send('HEY!');
+  res.send('index.html');
+})
+
