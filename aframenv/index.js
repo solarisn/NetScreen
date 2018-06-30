@@ -8,6 +8,8 @@ process.title = "some-bullshit";
 
 var app = express();
 
+
+
 app.get('/', (req, res) => {
   res.send('HEY!');
   res.send('index.html');
@@ -18,19 +20,14 @@ app.listen(443, () => console.log('Server running on port 443'))
 
 let port;
 let webServer;
-if (process.env.SSL === "true") {
-  port = process.env.PORT || 443;
-  console.log("Starting server with SSL");
-  const options = {
-    key: fs.readFileSync("/etc/letsencrypt/live/netscreen.3diq.io/privkey.pem"),
-    cert: fs.readFileSync("/etc/letsencrypt/live/netscreen.3diq.io/fullchain.pem")
-  };
-  webServer = https.createServer(options, app);
-} else {
-  port = process.env.PORT || 8080;
-  console.log("Starting server without SSL");
-  webServer = http.createServer(app);
-}
+
+port = process.env.PORT || 443;
+console.log("Starting server with SSL");
+const options = {
+key: fs.readFileSync("/etc/letsencrypt/live/netscreen.3diq.io/privkey.pem"),
+cert: fs.readFileSync("/etc/letsencrypt/live/netscreen.3diq.io/fullchain.pem")
+};
+webServer = https.createServer(options, app);
 
 
 //listen on port
