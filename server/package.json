@@ -1,0 +1,12 @@
+{
+  "name": "NetScreen",
+  "version": "1.0.0",
+  "description": "NetScreen WebXR app for MSFT hackathon June 29th 2018",
+  "scripts": {
+    "start": "node ./server/easyrtc-server.js"
+  },
+  "author": "Solaris Nite",
+  "dependencies": {
+    "networked-aframe": "^0.5.0"
+  }
+}
