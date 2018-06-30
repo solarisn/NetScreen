@@ -4,13 +4,13 @@ var http = require('http');
 var https = require('https');
 var fs = require('fs');
 
-process.title = "some-bullshit"
+process.title = "some-bullshit";
 
-var app = express()
-app.use(serveStatic('.', {'index': ['index.html']}));
+var app = express();
 
 app.get('/', (req, res) => {
-  res.send('HEY!')
+  res.send('HEY!');
+  res.send('index.html');
 })
 
 app.listen(443, () => console.log('Server running on port 443'))
