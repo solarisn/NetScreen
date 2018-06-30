@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Hello, World! - A-Frame</title>
+    <meta name="description" content="Hello, World! - A-Frame">
+    <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <a-assets>
+        <!-- Change the src over to a url for the stream-->
+        <video id="dtStream" src="assets/out_lf.mp4" autoplay="true">
+      </a-assets>
+      <a-entity position="0 .6 4">
+        <a-camera>
+            <a-entity id="mycursor" cursor="fuse: true; fuseTimeout: 500; max-distance: 30;"
+            position="0 0 -5"
+            geometry="primitive: ring"
+            material="color: blue; shader: flat">
+            </a-entity>
+        </a-camera>
+      </a-entity>
+
+      <!-- "button" -->
+      <a-entity id="start" geometry="primitive: box" cursor-listener material="color: red" position="0 0 -2"></a>
+
+      <a-plane position="0 2 -4" rotation="0 0 0" width="4" height="4" material="src: #dtStream"></a-plane>
+      <a-plane position="0 0 -4" rotation="-90 0 0" width="8" height="8" color="#99ccff"></a-plane>
+      <a-sky color="#ECECEC"></a-sky>
+    </a-scene>
+    <script src="app.js"></script>
+  </body>
+</html>
