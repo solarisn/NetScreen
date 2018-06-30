@@ -17,12 +17,15 @@ process.title = "node-easyrtc";
 var app = express();
 app.use(serveStatic('server/static', {'index': ['index.html']}));
 // set up a route to redirect http to https
-app.get('*', function(req, res) {  
-    res.redirect('https://' + req.headers.host + req.url);
 
-    // Or, if you don't want to automatically detect the domain name from the request header, you can hard code it:
-    // res.redirect('https://example.com' + req.url);
-})
+if (process.env.SSL === 'true') {
+  app.get('*', function(req, res) {  
+      res.redirect('https://' + req.headers.host + req.url);
+
+      // Or, if you don't want to automatically detect the domain name from the request header, you can hard code it:
+      // res.redirect('https://example.com' + req.url);
+  });
+}
 
 let port;
 let webServer;
@@ -35,7 +38,7 @@ if (process.env.SSL === "true") {
   };
   webServer = https.createServer(options, app);
 } else {
-  port = process.env.PORT || 80;
+  port = process.env.PORT || 8080;
   console.log("Starting server without SSL");
   webServer = http.createServer(app);
 }

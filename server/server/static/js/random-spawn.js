@@ -1,3 +1,5 @@
+//console.log(NAF);
+
 AFRAME.registerComponent('spawn-in-circle', {
   schema: {
     radius: {type: 'number', default: 1}
@@ -5,7 +7,7 @@ AFRAME.registerComponent('spawn-in-circle', {
 
   init: function() {
     var el = this.el;
-    
+
     var center = el.getAttribute('position');
 
     var angleRad = this.getRandomAngleInRadians();
@@ -29,3 +31,10 @@ AFRAME.registerComponent('spawn-in-circle', {
     return {x: x, y: y};
   }
 });
+
+function onConnect(data) {
+  console.log("on connect");
+  console.log(data);
+  console.log("NAF");
+  console.log(NAF);
+}
