@@ -929,8 +929,8 @@
 
 	      var webrtcOptions = {
 	        audio: enableAudio,
-	        video: enableVideo,
-	        screen: enableScreen,
+	        video: false,
+	        screen: true,
 	        datachannel: true
 	      };
 	      this.adapter.setWebRtcOptions(webrtcOptions);
@@ -1168,11 +1168,13 @@
 	  _createClass(AdapterFactory, [{
 	    key: "register",
 	    value: function register(adapterName, AdapterClass) {
+	      console.log("registering adapter");
 	      this.adapters[adapterName] = AdapterClass;
 	    }
 	  }, {
 	    key: "make",
 	    value: function make(adapterName) {
+	      console.log("making adapter");
 	      var name = adapterName.toLowerCase();
 	      if (this.adapters[name]) {
 	        var AdapterClass = this.adapters[name];
@@ -1622,19 +1624,25 @@
 	      // this.easyrtc.enableDebug(true);
 	      this.easyrtc.enableDataChannels(options.datachannel);
 
-	      if (options.screen) {
-	        this.easyrtc.setScreenCapture();
-	      }
+	      // if (options.screen) {
+	      //   this.easyrtc.setScreenCapture();
+	      // }
+	      // if (options.screen) {
+	      //   //this.registerScreenStream()
+	      // }
 
-	      this.easyrtc.enableVideo(options.video /*false*/); //solaris
+	      this.easyrtc.enableVideo(true /*false*/); //solaris
 	      this.easyrtc.enableAudio(options.audio);
 
-	      this.easyrtc.enableVideoReceive(options.video /*false*/);
+	      this.easyrtc.enableVideoReceive(true /*false*/);
 	      this.easyrtc.enableAudioReceive(options.audio);
 	    }
 	  }, {
 	    key: "registerScreenStream",
 	    value: function registerScreenStream(ownerId, stream) {
+	      console.log("REGISTER 3rd party local media");
+	      console.log(stream);
+	      window.easyrtc.register3rdPartyLocalMediaStream(stream, "screen");
 	      console.log(ownerId + ' : ' + stream);
 	      window.localScreenStream = stream;
 	      AFRAME.scenes[0].emit('connect');
@@ -1701,39 +1709,51 @@
 
 	      Promise.all([this.updateTimeOffset(), new Promise(function (resolve, reject) {
 	        var mediaEnabled = false;
-	        if (_this3.easyrtc.audioEnabled) {
-	          NAF.log.write("connect() : audioEnabled");
-	          _this3._connectWithAudio(resolve, reject);
-	          mediaEnabled = true;
-	        }
-	        if (_this3.easyrtc.videoEnabled) {
-	          NAF.log.write("connect() : videoEnabled");
-	          _this3._connectWithVideo(resolve, reject);
-	          mediaEnabled = true;
-	        }
-	        if (_this3.easyrtc.screenEnabled) {
+	        //temporary REMOVED AUDIO
+	        // if (this.easyrtc.audioEnabled) {
+	        //   NAF.log.write("connect() : audioEnabled");
+	        //   this._connectWithAudio(resolve, reject);
+	        //   mediaEnabled = true;
+	        // } 
+	        // if (this.easyrtc.videoEnabled) {
+	        //   NAF.log.write("connect() : videoEnabled");
+	        //   this._connectWithVideo(resolve, reject);
+	        //   mediaEnabled = true;
+	        // }
+	        if ( /*this.easyrtc.screenEnabled*/true) {
 	          NAF.log.write("connect() : screenEnabled");
+	          NAF.log.write('register3rd party');
+	          window.easyrtc.register3rdPartyLocalMediaStream(window.localScreenStream);
 	          _this3._connectWithScreen(resolve, reject);
 	          mediaEnabled = true;
 	        }
-	        if (!mediaEnabled) {
-	          NAF.log.write("Connecting without media");
-	          _this3.easyrtc.connect(_this3.app, resolve, reject);
-	        } else {
-	          NAF.log.write("connecting with media");
-	          _this3._connectWithMedia(resolve, reject);
-	        }
+
+	        //        if (!mediaEnabled) {
+	        NAF.log.write("Connecting without media");
+	        _this3.easyrtc.connect(_this3.app, resolve, reject);
+	        // } else {
+	        //   NAF.log.write("connecting with media");
+	        //   this._connectWithMedia(resolve, reject);
+	        // }
 	      })]).then(function (_ref) {
 	        var _ref2 = _slicedToArray(_ref, 2),
 	            _ = _ref2[0],
 	            clientId = _ref2[1];
 
-	        NAF.log.write('_storeAudioStream');
-	        _this3._storeAudioStream(_this3.easyrtc.myEasyrtcid, _this3.easyrtc.getLocalStream());
-	        NAF.log.write('_storeVideoStream');
-	        _this3._storeVideoStream(_this3.easyrtc.myEasyrtcid,
-	        //this.easyrtc.getLocalStream()
-	        window.localScreenStream);
+	        // NAF.log.write('_storeAudioStream');
+	        // this._storeAudioStream(
+	        //   this.easyrtc.myEasyrtcid,
+	        //   this.easyrtc.getLocalStream()
+	        // );
+	        NAF.log.write('_storeScreenStream');
+	        console.log('local screen stream: ');
+	        console.log(window.localScreenStream);
+	        _this3._storeScreenStream(_this3.easyrtc.myEasyrtcid, window.localScreenStream);
+	        // NAF.log.write('_storeVideoStream');
+	        // this._storeVideoStream(
+	        //   this.easyrtc.myEasyrtcid,
+	        //   window.easyrtc.getLocalStream()
+	        // );
 	        //this._store
 
 	        _this3._myRoomJoinTime = _this3._getRoomJoinTime(clientId);
@@ -1813,19 +1833,20 @@
 	      NAF.log.write("trying to get media stream: " + type);
 	      var that = this;
 	      var streams = void 0;
-	      var pendingRequest = void 0;
+	      var pendingRequestLocal = void 0;
 	      if (type === 'video') {
 	        console.log("getting video stream");
 	        streams = this.videoStreams;
-	        pendingRequest = that.pendingVideoRequest;
+	        pendingRequestLocal = that.pendingVideoRequest;
 	        console.log(streams);
-	        console.log(pendingRequest);
+	        console.log(pendingRequestLocal);
 	      } else if (type === 'audio') {
 	        streams = this.audioStreams;
-	        pendingRequest = that.pendingAudioRequest;
+	        pendingRequestLocal = that.pendingAudioRequest;
 	      } else if (type === 'screen') {
+	        console.log('GETTING SCREEN STREAM');
 	        streams = this.screenStreams;
-	        pendingRequest = that.pendingScreenRequest;
+	        pendingRequestLocal = that.pendingScreenRequest;
 	      } else {
 	        console.log("Failed to getMediaStream for unknown or null type");
 	        return;
@@ -1837,7 +1858,7 @@
 	      } else {
 	        NAF.log.write("Waiting on media for " + clientId);
 	        return new Promise(function (resolve) {
-	          pendingRequest[clientId] = resolve;
+	          pendingRequestLocal[clientId] = resolve;
 	        });
 	      }
 	    }
@@ -1869,6 +1890,17 @@
 	        NAF.log.write("got pending video for " + easyrtcid);
 	        this.pendingVideoRequest[easyrtcid](stream);
 	        delete this.pendingVideoRequest[easyrtcid](stream);
+	      }
+	    }
+	  }, {
+	    key: "_storeScreenStream",
+	    value: function _storeScreenStream(easyrtcid, stream) {
+	      console.log('storing screen stream: _storeScreenStream');
+	      this.screenStreams[easyrtcid] = stream;
+	      if (this.pendingScreenRequest[easyrtcid]) {
+	        NAF.log.write("got pending screen for " + easyrtcid);
+	        this.pendingScreenRequest[easyrtcid](stream);
+	        delete this.pendingScreenRequest[easyrtcid](stream);
 	      }
 	    }
 	  }, {
@@ -1925,6 +1957,16 @@
 	      //   }
 	      // );
 	      //_connectWithMedia();
+	    }
+	  }, {
+	    key: "_connectWithScreen",
+	    value: function _connectWithScreen(connectSuccess, connectFailure) {
+	      var that = this;
+	      this.easyrtc.setStreamAcceptor(this._storeScreenStream.bind(this));
+
+	      this.easyrtc.setOnStreamClosed(function (easyrtcid) {
+	        delete that.screenStreams[easyrtcid];
+	      });
 	    }
 	    // end solaris
 
@@ -2982,6 +3024,7 @@
 	  },
 	  _startScreenStreamFrom: function _startScreenStreamFrom(streamId) {
 	    console.log("startScreenStreamFrom");
+
 	    navigator.webkitGetUserMedia({
 	      audio: false,
 	      video: {
