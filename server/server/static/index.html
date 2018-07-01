@@ -33,10 +33,15 @@
 
 		    <a-entity
               class="avatar"
-              obj-model="obj: #tv-model"
-              scale="0.001 0.001 0.001"
-              material="shader: standard; color red;"
             >
+
+                <a-entity
+                  class="avatar"
+                  obj-model="obj: #tv-obj; mtl: #tv-mtl"
+                  scale="0.001 0.001 0.001"
+                  material="shader: standard; color red;"
+                  rotation="0 180 0"
+                >
 
                 <!-- sphere head
 		      <a-sphere class="head"
@@ -76,8 +81,8 @@
             <!-- icons -->
             <img id="icon-move" src="./img/icon-move.png">
 
-            <a-asset-item id="tv-model" src="./obj/tv/tv.obj"></a-asset-item>
-
+            <a-asset-item id="tv-obj" src="./obj/tv/tv.obj"></a-asset-item>
+            <a-asset-item id="tv-mtl" src="./obj/tv/tv.mtl"></a-asset-item>
 
 		</a-assets>
 
