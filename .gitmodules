@@ -1,0 +1,3 @@
+[submodule "chrome-ext"]
+	path = chrome-ext
+	url = https://github.com/emmahawk/NetScreen-Extension.git

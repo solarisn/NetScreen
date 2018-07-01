@@ -10,22 +10,20 @@
 
   </head>
   <body>
-    <a-scene
-        networked-scene="
-    	  app: NetScreen;
-    	  room: default;
-    	  debug: true;
-    	  adapter: easyrtc;
-    	  audio: false;
-    	  video: false;
-    	  onConnect: onConnect;
-    	"
-    >
+    <a-scene networked-scene="
+	  app: NetScreen;
+	  room: default;
+	  debug: true;
+	  adapter: easyrtc;
+	  audio: true;
+	  video: true;
+	  onConnect: onConnect;
+	">
 		<a-assets>
 
 		  <template id="video-template">
 
-		  	<a-video id="localVideo" networked-video-source width="4" height="2.25">
+		  	<a-video class='avideo' networked-video-source width="4" height="2.25">
                 <a-plane src="#icon-move" position="7.5 5 0" color="yellow" height="1" width="1"></a-plane>
             </a-video>
 

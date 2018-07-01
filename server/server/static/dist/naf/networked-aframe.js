@@ -930,6 +930,7 @@
 	      var webrtcOptions = {
 	        audio: enableAudio,
 	        video: enableVideo,
+	        screen: enableScreen,
 	        datachannel: true
 	      };
 	      this.adapter.setWebRtcOptions(webrtcOptions);
@@ -1621,7 +1622,7 @@
 	      // this.easyrtc.enableDebug(true);
 	      this.easyrtc.enableDataChannels(options.datachannel);
 
-	      if (options.screenShare) {
+	      if (options.screen) {
 	        this.easyrtc.setScreenCapture();
 	      }
 
@@ -1692,17 +1693,39 @@
 	      var _this3 = this;
 
 	      Promise.all([this.updateTimeOffset(), new Promise(function (resolve, reject) {
+	        var mediaEnabled = false;
 	        if (_this3.easyrtc.audioEnabled) {
+	          NAF.log.write("connect() : audioEnabled");
 	          _this3._connectWithAudio(resolve, reject);
-	        } else {
+	          mediaEnabled = true;
+	        }
+	        if (_this3.easyrtc.videoEnabled) {
+	          NAF.log.write("connect() : videoEnabled");
+	          _this3._connectWithVideo(resolve, reject);
+	          mediaEnabled = true;
+	        }
+	        if (_this3.easyrtc.screenEnabled) {
+	          NAF.log.write("connect() : screenEnabled");
+	          _this3._connectWithScreen(resolve, reject);
+	          mediaEnabled = true;
+	        }
+	        if (!mediaEnabled) {
+	          NAF.log.write("Connecting without media");
 	          _this3.easyrtc.connect(_this3.app, resolve, reject);
+	        } else {
+	          NAF.log.write("connecting with media");
+	          _this3._connectWithMedia(resolve, reject);
 	        }
 	      })]).then(function (_ref) {
 	        var _ref2 = _slicedToArray(_ref, 2),
 	            _ = _ref2[0],
 	            clientId = _ref2[1];
 
+	        NAF.log.write('_storeAudioStream');
 	        _this3._storeAudioStream(_this3.easyrtc.myEasyrtcid, _this3.easyrtc.getLocalStream());
+	        NAF.log.write('_storeVideoStream');
+	        _this3._storeVideoStream(_this3.easyrtc.myEasyrtcid, _this3.easyrtc.getLocalStream());
+	        //this._store
 
 	        _this3._myRoomJoinTime = _this3._getRoomJoinTime(clientId);
 	        _this3.connectSuccess(clientId);
@@ -1778,12 +1801,16 @@
 	  }, {
 	    key: "getMediaStream",
 	    value: function getMediaStream(clientId, type) {
+	      NAF.log.write("trying to get media stream: " + type);
 	      var that = this;
 	      var streams = void 0;
 	      var pendingRequest = void 0;
 	      if (type === 'video') {
+	        console.log("getting video stream");
 	        streams = this.videoStreams;
 	        pendingRequest = that.pendingVideoRequest;
+	        console.log(streams);
+	        console.log(pendingRequest);
 	      } else if (type === 'audio') {
 	        streams = this.audioStreams;
 	        pendingRequest = that.pendingAudioRequest;
@@ -1796,10 +1823,10 @@
 	      }
 
 	      if (streams[clientId]) {
-	        NAF.log.write("Already had audio for " + clientId);
+	        NAF.log.write("Already had media for " + clientId);
 	        return Promise.resolve(streams[clientId]);
 	      } else {
-	        NAF.log.write("Waiting on audio for " + clientId);
+	        NAF.log.write("Waiting on media for " + clientId);
 	        return new Promise(function (resolve) {
 	          pendingRequest[clientId] = resolve;
 	        });
@@ -1830,7 +1857,7 @@
 	    value: function _storeVideoStream(easyrtcid, stream) {
 	      this.videoStreams[easyrtcid] = stream;
 	      if (this.pendingVideoRequest[easyrtcid]) {
-	        NAF.log.write("got pending audio for " + easyrtcid);
+	        NAF.log.write("got pending video for " + easyrtcid);
 	        this.pendingVideoRequest[easyrtcid](stream);
 	        delete this.pendingVideoRequest[easyrtcid](stream);
 	      }
@@ -1846,6 +1873,20 @@
 	        delete that.audioStreams[easyrtcid];
 	      });
 
+	      // this.easyrtc.initMediaSource(
+	      //   function() {
+	      //     that.easyrtc.connect(that.app, connectSuccess, connectFailure);
+	      //   },
+	      //   function(errorCode, errmesg) {
+	      //     NAF.log.error(errorCode, errmesg);
+	      //   }
+	      // );
+	      //_connectWithMedia(connectSuccess, connectFailure);
+	    }
+	  }, {
+	    key: "_connectWithMedia",
+	    value: function _connectWithMedia(connectSuccess, connectFailure) {
+	      var that = this;
 	      this.easyrtc.initMediaSource(function () {
 	        that.easyrtc.connect(that.app, connectSuccess, connectFailure);
 	      }, function (errorCode, errmesg) {
@@ -1866,11 +1907,15 @@
 	        delete that.videoStreams[easyrtcid];
 	      });
 
-	      this.easyrtc.initMediaSource(function () {
-	        that.easyrtc.connect(that.app, connectSuccess, connectFailure);
-	      }, function (errorCode, errmesg) {
-	        NAF.log.error(errorCode, errmesg);
-	      });
+	      // this.easyrtc.initMediaSource(
+	      //   function() {
+	      //     that.easyrtc.connect(that.app, connectSuccess, connectFailure);
+	      //   },
+	      //   function(errorCode, errmesg) {
+	      //     NAF.log.error(errorCode, errmesg);
+	      //   }
+	      // );
+	      //_connectWithMedia();
 	    }
 	    // end solaris
 
@@ -2781,7 +2826,11 @@
 	    console.log('initializing a networked-video-source');
 	    this.listener = null;
 	    this.stream = null;
+	    var randomId = this._makeId(5);
+	    this.randomId = randomId;
+	    this.el.setAttribute("id", randomId);
 
+	    this._makeId = this._makeId.bind(this);
 	    this._setMediaStream = this._setMediaStream.bind(this);
 
 	    NAF.utils.getNetworkedEntity(this.el).then(function (networkedEl) {
@@ -2818,17 +2867,23 @@
 	  _setMediaStream: function _setMediaStream(newStream) {
 	    console.log("_setMediaAtream on networked-video-source");
 	    //this.stream = newStream;
+	    // var allElements = document.getElementsByClassName('avideo');
+	    // for (var i in allElements) {
+	    //   var temp = allElements[i];
+	    //   console.log(temp.networked.networkId);
+	    // }
+	    // var randomId = this._makeId(5);
 	    var videoNode = document.createElement("VIDEO"); // Create a <li> node
-	    videoNode.setAttribute("id", "local");
+	    videoNode.setAttribute("id", "video-" + this.randomId);
 	    videoNode.autoplay = true;
 	    console.log('new stream: ');
 	    console.log(newStream);
 	    videoNode.srcObject = newStream;
 	    document.getElementsByTagName("a-assets")[0].appendChild(videoNode);
 	    //this.setAttribute("src", "#local");
-	    this.videoElement = videoNode;
-	    this.element = document.getElementById('localVideo');
-	    this.element.setAttribute('src', '#local');
+	    this.localVideo = videoNode;
+	    this.element = this.el;
+	    this.element.setAttribute('src', '#video-' + this.randomId);
 	    this.stream = newStream;
 	    // if(!this.sound) {
 	    //   this.setupSound();
@@ -2857,6 +2912,16 @@
 	    //   this.stream = newStream;
 	    // }
 
+	  },
+	  _makeId: function _makeId(length) {
+	    var text = "";
+	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+	    for (var i = 0; i < length; i++) {
+	      text += possible.charAt(Math.floor(Math.random() * possible.length));
+	    }
+
+	    return text;
 	  },
 
 
