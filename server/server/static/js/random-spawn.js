@@ -43,6 +43,8 @@ function onConnect(data) {
   console.log(data);
   console.log("NAF");
   console.log(NAF);
+  //window.postMessage({ type: 'SS_UI_REQUEST', text: 'start' }, '*');
+
   //$('#localVideo').play();
   //console.log($('#aframevideo'));
   //$('#aframevideo').play();

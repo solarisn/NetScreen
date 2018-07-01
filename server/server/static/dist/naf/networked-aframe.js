@@ -929,8 +929,8 @@
 
 	      var webrtcOptions = {
 	        audio: enableAudio,
-	        video: enableVideo,
-	        screen: enableScreen,
+	        video: false,
+	        screen: true,
 	        datachannel: true
 	      };
 	      this.adapter.setWebRtcOptions(webrtcOptions);
@@ -1168,11 +1168,13 @@
 	  _createClass(AdapterFactory, [{
 	    key: "register",
 	    value: function register(adapterName, AdapterClass) {
+	      console.log("registering adapter");
 	      this.adapters[adapterName] = AdapterClass;
 	    }
 	  }, {
 	    key: "make",
 	    value: function make(adapterName) {
+	      console.log("making adapter");
 	      var name = adapterName.toLowerCase();
 	      if (this.adapters[name]) {
 	        var AdapterClass = this.adapters[name];
@@ -1622,15 +1624,28 @@
 	      // this.easyrtc.enableDebug(true);
 	      this.easyrtc.enableDataChannels(options.datachannel);
 
-	      if (options.screen) {
-	        this.easyrtc.setScreenCapture();
-	      }
+	      // if (options.screen) {
+	      //   this.easyrtc.setScreenCapture();
+	      // }
+	      // if (options.screen) {
+	      //   //this.registerScreenStream()
+	      // }
 
-	      this.easyrtc.enableVideo(options.video /*false*/); //solaris
+	      this.easyrtc.enableVideo(true /*false*/); //solaris
 	      this.easyrtc.enableAudio(options.audio);
 
-	      this.easyrtc.enableVideoReceive(options.video /*false*/);
+	      this.easyrtc.enableVideoReceive(true /*false*/);
 	      this.easyrtc.enableAudioReceive(options.audio);
+	    }
+	  }, {
+	    key: "registerScreenStream",
+	    value: function registerScreenStream(ownerId, stream) {
+	      console.log("REGISTER 3rd party local media");
+	      console.log(stream);
+	      window.easyrtc.register3rdPartyLocalMediaStream(stream, "screen");
+	      console.log(ownerId + ' : ' + stream);
+	      window.localScreenStream = stream;
+	      AFRAME.scenes[0].emit('connect');
 	    }
 	  }, {
 	    key: "setServerConnectListeners",
@@ -1694,37 +1709,51 @@
 
 	      Promise.all([this.updateTimeOffset(), new Promise(function (resolve, reject) {
 	        var mediaEnabled = false;
-	        if (_this3.easyrtc.audioEnabled) {
-	          NAF.log.write("connect() : audioEnabled");
-	          _this3._connectWithAudio(resolve, reject);
-	          mediaEnabled = true;
-	        }
-	        if (_this3.easyrtc.videoEnabled) {
-	          NAF.log.write("connect() : videoEnabled");
-	          _this3._connectWithVideo(resolve, reject);
-	          mediaEnabled = true;
-	        }
-	        if (_this3.easyrtc.screenEnabled) {
+	        //temporary REMOVED AUDIO
+	        // if (this.easyrtc.audioEnabled) {
+	        //   NAF.log.write("connect() : audioEnabled");
+	        //   this._connectWithAudio(resolve, reject);
+	        //   mediaEnabled = true;
+	        // } 
+	        // if (this.easyrtc.videoEnabled) {
+	        //   NAF.log.write("connect() : videoEnabled");
+	        //   this._connectWithVideo(resolve, reject);
+	        //   mediaEnabled = true;
+	        // }
+	        if ( /*this.easyrtc.screenEnabled*/true) {
 	          NAF.log.write("connect() : screenEnabled");
+	          NAF.log.write('register3rd party');
+	          window.easyrtc.register3rdPartyLocalMediaStream(window.localScreenStream);
 	          _this3._connectWithScreen(resolve, reject);
 	          mediaEnabled = true;
 	        }
-	        if (!mediaEnabled) {
-	          NAF.log.write("Connecting without media");
-	          _this3.easyrtc.connect(_this3.app, resolve, reject);
-	        } else {
-	          NAF.log.write("connecting with media");
-	          _this3._connectWithMedia(resolve, reject);
-	        }
+
+	        //        if (!mediaEnabled) {
+	        NAF.log.write("Connecting without media");
+	        _this3.easyrtc.connect(_this3.app, resolve, reject);
+	        // } else {
+	        //   NAF.log.write("connecting with media");
+	        //   this._connectWithMedia(resolve, reject);
+	        // }
 	      })]).then(function (_ref) {
 	        var _ref2 = _slicedToArray(_ref, 2),
 	            _ = _ref2[0],
 	            clientId = _ref2[1];
 
-	        NAF.log.write('_storeAudioStream');
-	        _this3._storeAudioStream(_this3.easyrtc.myEasyrtcid, _this3.easyrtc.getLocalStream());
-	        NAF.log.write('_storeVideoStream');
-	        _this3._storeVideoStream(_this3.easyrtc.myEasyrtcid, _this3.easyrtc.getLocalStream());
+	        // NAF.log.write('_storeAudioStream');
+	        // this._storeAudioStream(
+	        //   this.easyrtc.myEasyrtcid,
+	        //   this.easyrtc.getLocalStream()
+	        // );
+	        NAF.log.write('_storeScreenStream');
+	        console.log('local screen stream: ');
+	        console.log(window.localScreenStream);
+	        _this3._storeScreenStream(_this3.easyrtc.myEasyrtcid, window.localScreenStream);
+	        // NAF.log.write('_storeVideoStream');
+	        // this._storeVideoStream(
+	        //   this.easyrtc.myEasyrtcid,
+	        //   window.easyrtc.getLocalStream()
+	        // );
 	        //this._store
 
 	        _this3._myRoomJoinTime = _this3._getRoomJoinTime(clientId);
@@ -1804,19 +1833,20 @@
 	      NAF.log.write("trying to get media stream: " + type);
 	      var that = this;
 	      var streams = void 0;
-	      var pendingRequest = void 0;
+	      var pendingRequestLocal = void 0;
 	      if (type === 'video') {
 	        console.log("getting video stream");
 	        streams = this.videoStreams;
-	        pendingRequest = that.pendingVideoRequest;
+	        pendingRequestLocal = that.pendingVideoRequest;
 	        console.log(streams);
-	        console.log(pendingRequest);
+	        console.log(pendingRequestLocal);
 	      } else if (type === 'audio') {
 	        streams = this.audioStreams;
-	        pendingRequest = that.pendingAudioRequest;
+	        pendingRequestLocal = that.pendingAudioRequest;
 	      } else if (type === 'screen') {
+	        console.log('GETTING SCREEN STREAM');
 	        streams = this.screenStreams;
-	        pendingRequest = that.pendingScreenRequest;
+	        pendingRequestLocal = that.pendingScreenRequest;
 	      } else {
 	        console.log("Failed to getMediaStream for unknown or null type");
 	        return;
@@ -1828,7 +1858,7 @@
 	      } else {
 	        NAF.log.write("Waiting on media for " + clientId);
 	        return new Promise(function (resolve) {
-	          pendingRequest[clientId] = resolve;
+	          pendingRequestLocal[clientId] = resolve;
 	        });
 	      }
 	    }
@@ -1860,6 +1890,17 @@
 	        NAF.log.write("got pending video for " + easyrtcid);
 	        this.pendingVideoRequest[easyrtcid](stream);
 	        delete this.pendingVideoRequest[easyrtcid](stream);
+	      }
+	    }
+	  }, {
+	    key: "_storeScreenStream",
+	    value: function _storeScreenStream(easyrtcid, stream) {
+	      console.log('storing screen stream: _storeScreenStream');
+	      this.screenStreams[easyrtcid] = stream;
+	      if (this.pendingScreenRequest[easyrtcid]) {
+	        NAF.log.write("got pending screen for " + easyrtcid);
+	        this.pendingScreenRequest[easyrtcid](stream);
+	        delete this.pendingScreenRequest[easyrtcid](stream);
 	      }
 	    }
 	  }, {
@@ -1916,6 +1957,16 @@
 	      //   }
 	      // );
 	      //_connectWithMedia();
+	    }
+	  }, {
+	    key: "_connectWithScreen",
+	    value: function _connectWithScreen(connectSuccess, connectFailure) {
+	      var that = this;
+	      this.easyrtc.setStreamAcceptor(this._storeScreenStream.bind(this));
+
+	      this.easyrtc.setOnStreamClosed(function (easyrtcid) {
+	        delete that.screenStreams[easyrtcid];
+	      });
 	    }
 	    // end solaris
 
@@ -2817,11 +2868,20 @@
 	AFRAME.registerComponent('networked-video-source', {
 	  schema: {
 	    positional: { default: true },
-	    rotational: { default: true }
+	    rotational: { default: true },
+	    message: { default: "SLDHJLSKDJFLKJSLDKFJLSKJDFLKJS" },
+	    event: { default: "newStream" }
 	  },
 
 	  init: function init() {
 	    var _this = this;
+
+	    var self = this;
+	    this.eventHandlerFn = function () {
+	      console.log(self.data.message);
+	    };
+
+	    window.extensionInstalled = false;
 
 	    console.log('initializing a networked-video-source');
 	    this.listener = null;
@@ -2832,38 +2892,87 @@
 
 	    this._makeId = this._makeId.bind(this);
 	    this._setMediaStream = this._setMediaStream.bind(this);
+	    this._startScreenStreamFrom = this._startScreenStreamFrom.bind(this);
+	    this._registerScreenStream = this._registerScreenStream.bind(this);
 
 	    NAF.utils.getNetworkedEntity(this.el).then(function (networkedEl) {
 	      var ownerId = networkedEl.components.networked.data.owner;
-	      console.log("owner of this video elemt is: " + ownerId);
+	      _this.ownerId = ownerId;
+	      console.log("owner of this video element is: " + ownerId);
 	      if (ownerId) {
 	        console.log("ownerid exists!");
-	        NAF.connection.adapter.getMediaStream(ownerId, 'video').then(_this._setMediaStream).catch(function (e) {
+	        NAF.connection.adapter.getMediaStream(ownerId, 'screen').then(_this._setMediaStream).catch(function (e) {
 	          return naf.log.error('Error getting video stream for ' + ownerId, e);
 	        });
 	      } else {
+	        window.localScreenEl = _this;
 	        console.log("ownerid doesn't exist because it belongs to the local player!");
 	        // Correctly configured local entity, perhaps do something here for enabling debug audio loopback
 	        // NAF.connection.adapter.getMediaStream(ownerId, 'video')
 	        //   .then(this._setMediaStream)
 	        //   .catch((e) => naf.log.error(`Error getting video stream for ${ownerId}`, e));
-	        if (navigator.mediaDevices.getUserMedia) {
-	          //console.log(NAF.connection);
-	          console.log("user media exists");
-	          navigator.mediaDevices.getUserMedia({ video: true }).then(_this._setMediaStream).catch(function (error) {
-	            console.log("Something went wrong!");
-	            console.log(error);
-	          });
-	        }
+	        // if (navigator.mediaDevices.getUserMedia) { 
+	        //   //console.log(NAF.connection);
+	        // console.log("user media exists");      
+	        //     navigator.mediaDevices.getUserMedia({video: true})
+	        //   .then(this._setMediaStream)
+	        //   .catch(function(error) {
+	        //     console.log("Something went wrong!");
+	        //     console.log(error);
+	        //   });
+
+
+	        // }
+
+	        // listen for messages from the content-script
+	        window.addEventListener('message', function (event) {
+	          console.log("message from chrome extension: ");
+	          console.log(event);
+	          if (event.origin != window.location.origin) return;
+
+	          // content-script will send a 'SS_PING' msg if extension is installed
+	          if (event.data.type && event.data.type === 'SS_PING') {
+	            console.log("WE GOT EM'!");
+	            window.extensionInstalled = true;
+	            if (!window.localScreenStream) {
+	              window.postMessage({ type: 'SS_UI_REQUEST', text: 'start' }, '*');
+	            }
+	          }
+
+	          // user chose a stream
+	          if (event.data.type && event.data.type === 'SS_DIALOG_SUCCESS') {
+	            //console.log("")
+	            window.localScreenEl._startScreenStreamFrom(event.data.streamId);
+
+	            //this.el.emit('newStream', event.data.streamId);
+	          }
+
+	          // user clicked on 'cancel' in choose media dialog
+	          if (event.data.type && event.data.type === 'SS_DIALOG_CANCEL') {
+	            console.log('User cancelled!');
+	          }
+	        });
 
 	        //this._setMediaStream();
 	      }
 	    });
 	  },
 
-	  update: function update() {
-	    //this._setPannerProperties();
+	  update: function update(oldData) {
+	    var data = this.data;
+	    var el = this.el;
+
+	    if (oldData.event && data.event !== oldData.event) {
+	      el.removeEventListener(oldData.event, this.eventHandlerFn);
+	    }
+
+	    if (data.event) {
+	      el.addEventListener(data.event, this.eventHandlerFn);
+	    } else {
+	      console.log(data.message);
+	    }
 	  },
+
 	  _setMediaStream: function _setMediaStream(newStream) {
 	    console.log("_setMediaAtream on networked-video-source");
 	    //this.stream = newStream;
@@ -2913,6 +3022,40 @@
 	    // }
 
 	  },
+	  _startScreenStreamFrom: function _startScreenStreamFrom(streamId) {
+	    console.log("startScreenStreamFrom");
+
+	    navigator.webkitGetUserMedia({
+	      audio: false,
+	      video: {
+	        mandatory: {
+	          chromeMediaSource: 'desktop',
+	          chromeMediaSourceId: streamId,
+	          maxWidth: window.screen.width,
+	          maxHeight: window.screen.height
+	        }
+	      }
+	    },
+	    // successCallback
+	    function (screenStream) {
+	      var videoElement = void 0;
+	      console.log("screenStream retrieved! Trying to set on video element");
+	      //videoElement = document.getElementById('dtStream');
+	      //videoElement.srcObject = screenStream;//= URL.createObjectURL(screenStream);
+	      //videoElement.play();
+	      window.localScreenEl._registerScreenStream(window.localScreenEl.ownerId, screenStream);
+	      window.localScreenEl._setMediaStream(screenStream);
+	    },
+	    // errorCallback
+	    function (err) {
+	      console.log('getUserMedia failed!: ' + err);
+	    });
+	  },
+	  _registerScreenStream: function _registerScreenStream(ownerId, stream) {
+	    //NAF.connection.adapter.registerScreenStream(ownerId, stream);
+	    window.localScreenStream = stream;
+	    AFRAME.scenes[0].emit('connect');
+	  },
 	  _makeId: function _makeId(length) {
 	    var text = "";
 	    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -2935,12 +3078,13 @@
 	  // },
 
 	  remove: function remove() {
-	    // if (!this.sound) return;
+	    var data = this.data;
+	    var el = this.el;
 
-	    // this.el.removeObject3D(this.attrName);
-	    // if (this.stream) {
-	    //   this.sound.disconnect();
-	    // }
+	    // Remove event listener.
+	    if (data.event) {
+	      el.removeEventListener(data.event, this.eventHandlerFn);
+	    }
 	  },
 
 	  setupSound: function setupSound() {
