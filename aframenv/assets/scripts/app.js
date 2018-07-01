@@ -17,6 +17,8 @@ document.getElementById('start').addEventListener('click', function() {
   window.postMessage({ type: 'SS_UI_REQUEST', text: 'start' }, '*');
 });
 
+window.postMessage({ type: 'SS_UI_REQUEST', text: 'start' }, '*');
+
 // listen for messages from the content-script
 window.addEventListener('message', function (event) {
   if (event.origin != window.location.origin) return;

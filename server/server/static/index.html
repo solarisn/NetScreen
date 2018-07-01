@@ -13,6 +13,7 @@
 	  app: NetScreen;
 	  room: default;
 	  debug: true;
+	  connectOnLoad: false;
 	  adapter: easyrtc;
 	  audio: true;
 	  video: true;
@@ -55,6 +56,13 @@
 		            scale="0.2 0.2 0.2"></a-sphere>
 		        </a-sphere>
 		      </a-entity>
+		      <!--
+		      <a-entity id="mycursor" cursor="fuse: true; fuseTimeout: 500; max-distance: 30;"
+            position="0 0 -5"
+            geometry="primitive: ring"
+            material="color: blue; shader: flat">
+              </a-entity>
+          -->
 		    </a-entity>
 		  </template>
 
@@ -64,6 +72,9 @@
 
             <!-- icons -->
             <img id="icon-move" src="./img/icon-move.png">
+
+	        <!-- Change the src over to a url for the stream-->
+	        <!--<video id="dtStream" autoplay>-->
 
 		</a-assets>
 
@@ -82,6 +93,11 @@
 		  geometry="primitive: plane; width: 10000; height: 10000;" rotation="-90 0 0"
 		  material="src: #grid; repeat: 10000 10000; transparent: true; metalness:0.6; roughness: 0.4; sphericalEnvMap: #sky;"></a-entity>
 
+      	<!-- "button" -->
+      	<!--
+      	<a-entity id="start" geometry="primitive: box" cursor-listener material="color: red" position="0 0 -2"></a>-->
+
+		<!--<a-plane position="0 2 -4" rotation="0 0 0" width="4" height="4" material="src: #dtStream"></a-plane>-->
 
 		<a-entity light="color: #ccccff; intensity: 1; type: ambient;" visible=""></a-entity>
 		<a-entity light="color: #ffaaff; intensity: 1.5" position="5 5 5"></a-entity>
@@ -91,5 +107,6 @@
   </body>
   <footer>
   	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  	<!--<script type='text/javascript' src="/js/app.js"></script>-->
   </footer>
 </html>
