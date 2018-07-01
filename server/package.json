@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "description": "NetScreen WebXR app for MSFT hackathon June 29th 2018",
   "scripts": {
-    "start": "node ./server/easyrtc-server.js",
-    "ssl-start" : "SSL=true node ./server/easyrtc-server.js"
+    "start": "cp -r ./node_modules/networked-aframe/dist/networked-aframe.js ./server/static/dist/naf/networked-aframe.js && node ./server/easyrtc-server.js",
+    "ssl-start": "SSL=true node ./server/easyrtc-server.js",
+    "build": "cd ./node_modules/networked-aframe/ && npm run dist && cd ../../ && npm start"
   },
   "author": "Solaris Nite",
   "dependencies": {
-    "networked-aframe": "^0.5.0"
+    "networked-aframe": "git+https://github.com/solarisn/networked-aframe.git"
   }
 }

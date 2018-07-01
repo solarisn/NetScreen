@@ -3,8 +3,10 @@
     <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
     <script src="easyrtc/easyrtc.js"></script>
-    <script src="https://unpkg.com/networked-aframe/dist/networked-aframe.min.js"></script>
+    <!--<script src="https://unpkg.com/networked-aframe/dist/networked-aframe.min.js"></script>-->
+    <script src="/dist/naf/networked-aframe.js"></script>
     <script src="js/random-spawn.js"></script>
+    
   </head>
   <body>
     <a-scene networked-scene="
@@ -12,12 +14,16 @@
 	  room: default;
 	  debug: true;
 	  adapter: easyrtc;
-	  audio: true;
+	  audio: false;
+	  video: false;
 	  onConnect: onConnect;
 	">
 		<a-assets>
+		  <template id="video-template">
+		  	<a-video id="localVideo" networked-video-source width="16" height="9" spawn-in-circle="radius:20"></a-video>
+		  </template>
 		  <template id="avatar-template">
-		    <a-entity class="avatar" networked-audio-source>
+		    <a-entity class="avatar">
 		      <a-sphere class="head"
 		        color="#5985ff"
 		        scale="0.45 0.5 0.4"
@@ -52,12 +58,18 @@
 
 		</a-assets>
 
-		<a-entity id="player" networked="template:#avatar-template;attachTemplateToLocal:false;" camera position="0 1.3 0" wasd-controls spawn-in-circle="radius:3;" look-controls></a-entity>
+		<a-entity id="player" networked="template:#avatar-template;attachTemplateToLocal:false;" camera position="0 1.3 0" wasd-controls spawn-in-circle="radius:3;" look-controls>
+		</a-entity>
+		<!--<a-video src="#localVideo" width="16" height="9" position="0 0 -20"></a-video>-->
+		<!--
+		<a-video id="localVideo" networked="template:#video-template;attachTemplateToLocal:false" networked-video-source width="16" height="9" spawn-in-circle='radius:20;'></a-video>-->
+		<a-video networked="template:#video-template;attachTemplateToLocal:true"></a-video>
 
 				<!-- Add to bottom of a-scene tag -->
 		<a-entity position="0 0 0"
 		  geometry="primitive: plane; width: 10000; height: 10000;" rotation="-90 0 0"
 		  material="src: #grid; repeat: 10000 10000; transparent: true; metalness:0.6; roughness: 0.4; sphericalEnvMap: #sky;"></a-entity>
+
 
 		<a-entity light="color: #ccccff; intensity: 1; type: ambient;" visible=""></a-entity>
 		<a-entity light="color: #ffaaff; intensity: 1.5" position="5 5 5"></a-entity>
@@ -65,4 +77,7 @@
 		<a-sky src="#sky" rotation="0 -90 0"></a-sky>
 	</a-scene>
   </body>
+  <footer>
+  	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  </footer>
 </html>

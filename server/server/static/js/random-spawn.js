@@ -37,4 +37,33 @@ function onConnect(data) {
   console.log(data);
   console.log("NAF");
   console.log(NAF);
+  //$('#localVideo').play();
+  //console.log($('#aframevideo'));
+  //$('#aframevideo').play();
 }
+// var playing = false;
+// $(document).keypress(function(e)
+//     {
+
+//         var keynum;
+//         if(window.event)
+//         { // IE                 
+//             keynum = e.keyCode;
+//         }
+//         else if(e.which)
+//         { 
+//           // Netscape/Firefox/Opera                   
+//           keynum = e.which;
+//         }
+
+//         if (String.fromCharCode(keynum) === " ") {
+//           if (!playing) {
+//             $('#localVideo')[0].play();
+//           } else {
+//             $('#localVideo')[0].pause();
+//           }
+//           playing = !playing;
+//         }
+//         //var unicode=e.keyCode? e.keyCode : e.charCode;
+//         //alert(unicode);
+//     });
