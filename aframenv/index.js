@@ -4,6 +4,7 @@ var http = require('http');
 var https = require('https');
 var fs = require('fs');
 var path = require('path');
+var serveStatic = require('serve-static');
 
 process.title = "some-bullshit";
 
@@ -11,6 +12,8 @@ var app = express();
 
 let port;
 let webServer;
+
+app.use(serveStatic(__dirname, {'index':['index.html']}));
 
 port = process.env.PORT || 443;
 console.log("Starting server with SSL");
