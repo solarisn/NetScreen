@@ -19,9 +19,15 @@
 	  onConnect: onConnect;
 	">
 		<a-assets>
+
 		  <template id="video-template">
-		  	<a-video id="localVideo" networked-video-source width="16" height="9" position="0 0 -10"></a-video>
+
+		  	<a-video id="localVideo" networked-video-source width="16" height="9" position="0 0 -10">
+                <a-plane src="#icon-move" position="7.5 5 0" color="yellow" height="1" width="1"></a-plane>
+            </a-video>
+
 		  </template>
+
 		  <template id="avatar-template">
 		    <a-entity class="avatar">
 		      <a-sphere class="head"
@@ -56,10 +62,16 @@
 			<img id="grid" src="https://img.gs/bbdkhfbzkk/stretch/https://i.imgur.com/25P1geh.png" crossorigin="anonymous">
 			<img id="sky" src="https://img.gs/bbdkhfbzkk/2048x2048,stretch/http://i.imgur.com/WqlqEkq.jpg" crossorigin="anonymous" />
 
+            <!-- icons -->
+            <img id="icon-move" src="./img/icon-move.png">
+
 		</a-assets>
 
 		<a-entity id="player" networked="template:#avatar-template;attachTemplateToLocal:false;" camera position="0 1.3 0" wasd-controls spawn-in-circle="radius:3;" look-controls>
-    		<a-video networked="template:#video-template;attachTemplateToLocal:true" position="0 0 -1"></a-video>
+
+            <!-- networked content is visible by you and all players -->
+    		<a-video networked="template:#video-template;attachTemplateToLocal:true"></a-video>
+
 		</a-entity>
 		<!--<a-video src="#localVideo" width="16" height="9" position="0 0 -20"></a-video>-->
 		<!--
