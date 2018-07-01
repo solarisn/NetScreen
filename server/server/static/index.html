@@ -30,7 +30,15 @@
 		  </template>
 
 		  <template id="avatar-template">
-		    <a-entity class="avatar">
+
+		    <a-entity
+              class="avatar"
+              obj-model="obj: #tv-model"
+              scale="0.001 0.001 0.001"
+              material="shader: standard; color red;"
+            >
+
+                <!-- sphere head
 		      <a-sphere class="head"
 		        color="#5985ff"
 		        scale="0.45 0.5 0.4"
@@ -56,6 +64,8 @@
 		            scale="0.2 0.2 0.2"></a-sphere>
 		        </a-sphere>
 		      </a-entity>
+                -->
+
 		    </a-entity>
 		  </template>
 
@@ -65,6 +75,9 @@
 
             <!-- icons -->
             <img id="icon-move" src="./img/icon-move.png">
+
+            <a-asset-item id="tv-model" src="./obj/tv/tv.obj"></a-asset-item>
+
 
 		</a-assets>
 
@@ -77,6 +90,11 @@
             spawn-in-circle="radius:1;"
             networked="template:#avatar-template;attachTemplateToLocal:false;"
         ></a-entity>
+
+        <!--<a-entity oculus-touch-controls="hand: left"></a-entity>-->
+        <!--<a-entity oculus-touch-controls="hand: right"></a-entity>-->
+        <a-entity laser-controls="hand: right"></a-entity>
+
 
         <!-- networked content is visible by you and all players -->
 		<a-video
