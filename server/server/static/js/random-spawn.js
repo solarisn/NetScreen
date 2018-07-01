@@ -6,6 +6,12 @@ AFRAME.registerComponent('spawn-in-circle', {
   },
 
   init: function() {
+
+    // prevent this init logic from firing more than once when element is
+    // detached and reattached
+    if (this.el.initialized) return
+    this.el.initialized = true
+
     var el = this.el;
 
     var center = el.getAttribute('position');
@@ -49,12 +55,12 @@ function onConnect(data) {
 
 //         var keynum;
 //         if(window.event)
-//         { // IE                 
+//         { // IE
 //             keynum = e.keyCode;
 //         }
 //         else if(e.which)
-//         { 
-//           // Netscape/Firefox/Opera                   
+//         {
+//           // Netscape/Firefox/Opera
 //           keynum = e.which;
 //         }
 
